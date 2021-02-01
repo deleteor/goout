@@ -5,4 +5,4 @@ help:
 	$(GO) run main.go -h
 
 local:
-	$(GO) build -v -o bundles/$(APP) main.go
+	$(GO) build -v -o build/$(APP) main.go
