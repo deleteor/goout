@@ -6,9 +6,15 @@ import (
 	"fmt"
 	"io"
 	"net"
+
+	"github.com/keep-fool/goout/cmd"
 )
 
 func main() {
+	cmd.Execute()
+}
+
+func main1() {
 	server, err := net.Listen("tcp", ":1081")
 	if err != nil {
 		fmt.Printf("Listen failed: %v\n", err)
@@ -33,26 +39,26 @@ func main() {
 // }
 
 func process(client net.Conn) {
-	if err := Socks5Auth(client); err != nil {
+	if err := Socks5Auth1(client); err != nil {
 		fmt.Println("auth error:", err)
 		client.Close()
 		return
 	}
-	target, err := Socks5Connect(client)
+	target, err := Socks5Connect1(client)
 	if err != nil {
 		fmt.Println("connect error:", err)
 		client.Close()
 		return
 	}
-	Socks5Forward(client, target)
+	Socks5Forward1(client, target)
 }
 
-/*
+/*Socks5Auth1 认证
 VER 本次请求的协议版本号，取固定值 0x05（表示socks 5）
 NMETHODS 客户端支持的认证方式数量，可取值 1~255
 METHODS 可用的认证方式列表
 */
-func Socks5Auth(client net.Conn) (err error) {
+func Socks5Auth1(client net.Conn) (err error) {
 	buf := make([]byte, 256)
 	// 读取 VER 和 NMETHODS
 	n, err := io.ReadFull(client, buf[:2])
@@ -87,7 +93,7 @@ func Socks5Auth(client net.Conn) (err error) {
 	return nil
 }
 
-/*
+/*Socks5Connect1 代理
 VER 0x05 Socks5
 CMD 连接方式，0x01=CONNECT, 0x02=BIND, 0x03=UDP ASSOCIATE
 RSV 保留字段
@@ -95,7 +101,7 @@ ATYP 地址类型，0x01=IPv4，0x03=域名，0x04=IPv6
 DST.ADDR 目标地址
 DST.PORT 目标端口，2字节，网络字节序（network octec order）
 */
-func Socks5Connect(client net.Conn) (net.Conn, error) {
+func Socks5Connect1(client net.Conn) (net.Conn, error) {
 	buf := make([]byte, 256)
 
 	n, err := io.ReadFull(client, buf[:4])
@@ -153,7 +159,8 @@ func Socks5Connect(client net.Conn) (net.Conn, error) {
 	return dest, nil
 }
 
-func Socks5Forward(client, target net.Conn) {
+// Socks5Forward1 转发
+func Socks5Forward1(client, target net.Conn) {
 	forward := func(src, dest net.Conn) {
 		defer src.Close()
 		defer dest.Close()
